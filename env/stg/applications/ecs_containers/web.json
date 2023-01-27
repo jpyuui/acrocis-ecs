@@ -1,0 +1,114 @@
+[
+  {
+    "essential": true,
+    "name": "web",
+    "image": "${image_uri}",
+    "secrets": [
+      {
+        "name": "shop",
+        "valueFrom": "${ssm_shopify_shop_url}"
+      },
+      {
+        "name": "SHOPIFY_API_KEY",
+        "valueFrom": "${ssm_shopify_api_key}"
+      },
+      {
+        "name": "SHOPIFY_API_SECRET",
+        "valueFrom": "${ssm_shopify_api_secret}"
+      },
+      {
+        "name": "DB_USER",
+        "valueFrom": "${ssm_db_username}"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "valueFrom": "${ssm_db_password}"
+      }
+    ],
+    "environment": [
+      {
+        "name": "EVENT_BATCH_ARN",
+        "value": "arn:aws:events:ap-northeast-1::event-source/aws.partner/shopify.com/1427668993/shopify-dev1"
+      },
+      {
+        "name": "SCOPES",
+        "value": "write_products,write_customers,write_draft_orders,read_orders,read_customers,read_products,write_gift_cards,read_gift_cards"
+      },
+      {
+        "name": "HOST",
+        "value": "${static_hosting_url}"
+      },
+      {
+        "name": "DB_HOST",
+        "value": "${database_host}"
+      },
+      {
+        "name": "DB_NAME",
+        "value": "${database_name}"
+      },
+      {
+        "name": "EXTENSION_TITLE",
+        "value": "theme-app-extension"
+      },
+      {
+        "name": "EXTENSION_ID",
+        "value": "4423265"
+      },
+      {
+        "name": "EXTENSION_UUID",
+        "value": "45f8c091-06fa-43cf-916e-2ec5751cfe5c"
+      }
+    ],
+    "portMappings": [
+      {
+        "containerPort": ${app_port},
+        "hostPort": ${app_port}
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awsfirelens",
+      "secretOptions": null,
+      "options": null
+    }
+  },
+  {
+    "essential": false,
+    "name": "log_router",
+    "image": "${log_router_image_uri}",
+    "environment": [
+      {
+        "name": "REGION",
+        "value": "${region}"
+      },
+      {
+        "name": "ERROR_LOG_GROUP_NAME",
+        "value": "${error_log_group_name}"
+      },
+      {
+        "name": "ERROR_LOG_STREAM_PREFIX",
+        "value": "fluentbit-web-app-stg-"
+      },
+      {
+        "name": "DELIVERY_STREAM",
+        "value": "${all_log_delivery_stream}"
+      }
+    ],
+    "firelensConfiguration": {
+      "type": "fluentbit",
+      "options": {
+        "config-file-type": "file",
+        "config-file-value": "/fluent-bit/etc/extra.conf"
+      }
+    },
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "secret_options": null,
+      "options": {
+        "awslogs-group": "${log_container_log_group_name}",
+        "awslogs-region": "${region}",
+        "awslogs-stream-prefix": "fluentbit-"
+      }
+    },
+    "memoryReservation": 50
+  }
+]

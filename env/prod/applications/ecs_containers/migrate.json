@@ -1,0 +1,64 @@
+[
+  {
+    "name": "subscriber",
+    "image": "${image_uri}",
+    "entrypoint": ["/bin/sh", "-c"],
+    "command": [
+      "bundle exec ridgepole -c config/database.yaml -E production --apply -f ridgepole/schemafile"
+    ],
+    "secrets": [
+      {
+        "name": "AWS_ACCESS_KEY_ID",
+        "valueFrom": "${ssm_aws_access_key_id}"
+      },
+      {
+        "name": "AWS_SECRET_ACCESS_KEY",
+        "valueFrom": "${ssm_aws_secret_access_key}"
+      },
+      {
+        "name": "HUBSPOT_API_KEY",
+        "valueFrom": "${ssm_hubspot_api_key}"
+      },
+      {
+        "name": "DB_USER",
+        "valueFrom": "${ssm_db_username}"
+      },
+      {
+        "name": "DB_PASSWORD",
+        "valueFrom": "${ssm_db_password}"
+      }
+    ],
+    "environment": [
+      {
+        "name": "SQS_URL",
+        "value": "${sqs_url}"
+      },
+      {
+        "name": "DB_HOST",
+        "value": "${database_host}"
+      },
+      {
+        "name": "DB_NAME",
+        "value": "${database_name}"
+      },
+      {
+        "name": "SUBSCRIBER_ENV",
+        "value": "production"
+      }
+    ],
+    "portMappings": [
+      {
+        "containerPort": ${app_port},
+        "hostPort": ${app_port}
+      }
+    ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-region": "${region}",
+        "awslogs-group": "${log_group_name}",
+        "awslogs-stream-prefix": "ecs/migrate"
+      }
+    }
+  }
+]
